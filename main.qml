@@ -70,7 +70,7 @@ ApplicationWindow {
             Button {
                 text: "Save"
                 onClicked: {
-                    if (passwordEdit.text.length === 0 && userEdit.text !== kanban.user) {
+                    if (passwordEdit.text.length !== 0 && userEdit.text !== kanban.user) {
                         kanban.setAuth(userEdit.text, passwordEdit.text);
                     }
                     kanban.setUrl(urlEdit.text);
