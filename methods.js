@@ -7,6 +7,30 @@ function getValue(json, path)
     return json;
 }
 
+function toTimeString(seconds) {
+    if (isNaN(seconds))
+        return "NA";
+
+    var m = seconds / 60; seconds = Math.floor(seconds - Math.floor(m) * 60);
+    var h = m / 60; m = Math.floor(m - Math.floor(h) * 60);
+    var d = h / 8; h = Math.floor(h - Math.floor(d) * 8);
+    var w = d / 5; d = Math.floor(d - Math.floor(w) * 5);
+    w = Math.floor(w);
+
+    var str = "";
+    if (w > 0)
+        str += w + "w";
+    if (d > 0)
+        str += d + "d";
+    if (h > 0)
+        str += h + "h";
+    if (m > 0)
+        str += m + "m";
+    if (str.length === 0)
+        str = "0m"
+    return str;
+}
+
 function sendGetRequest(url, handler)
 {
     console.log("sendGetRequest", url)
@@ -17,19 +41,20 @@ function sendGetRequest(url, handler)
     xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             title = "Done";
+            console.error("http status: ", xhr.status)
             if (xhr.status === 200) {
                 handler(xhr);
             } else {
                 handler(null);
-                messageDialog.title = "Error";
-                messageDialog.text = xhr.responseText;
+                messageDialog.title = "Error " + xhr.status;
+                messageDialog.text = xhr.responseText + "'" + url + "'";
                 messageDialog.open();
             }
         }
     }
     title = "Waiting response ...";
     xhr.open("GET", url);
-    xhr.setRequestHeader( 'Authorization', 'Basic ' + authHash)
+    xhr.setRequestHeader('Authorization', 'Basic ' + authHash);
     xhr.send();
 }
 
@@ -53,7 +78,6 @@ function readIssues(queryUrl)
 function readProjects(url)
 {
     sendGetRequest(url + "/rest/api/2/project", function(request) {
-        console.log("readProjects", request);
         if (request === null) {
             projects = [];
         } else {

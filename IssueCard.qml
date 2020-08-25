@@ -1,4 +1,5 @@
 import QtQuick 2.0
+
 import "methods.js" as JS
 
 Rectangle {
@@ -44,6 +45,9 @@ Rectangle {
         img = JS.getValue(issue,"fields/issuetype/iconUrl")
         typeImage.source = typeof img == 'undefined' || img === null ? "" : img
         statusText.text = JS.getValue(issue,"fields/status/name")
+
+        progressBar.progress = JS.getValue(issue,"fields/progress/progress");
+        progressBar.total = JS.getValue(issue,"fields/timeoriginalestimate");
     }
 
     Text {
@@ -148,5 +152,78 @@ Rectangle {
         anchors.right: parent.right
         font.pixelSize: 12
     }
+
+
+    Rectangle {
+        id: progressBar
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 8
+        anchors.bottomMargin: 8
+        anchors.left: parent.left
+        width: parent.width / 3
+        height: 20
+        border.color: "black"
+        border.width: 1
+
+        property string progress: null
+        property string total: null
+
+        onTotalChanged: {
+            updateText()
+        }
+        onProgressChanged: {
+            updateText()
+        }
+
+        function updateText() {
+            var progressInt = parseInt(progress);
+            var totalInt = parseInt(total);
+            estimateText.text = JS.toTimeString(progressInt) + "/" + JS.toTimeString(totalInt);
+            if (!isNaN(totalInt) && !isNaN(progressInt))
+            {
+                var aspect = progressInt / totalInt;
+                indicator.color = aspect > 1.0 ? overtimeIndicatorColor
+                                               : normalIndicatorColor;
+
+                indicator.progress = Math.min(aspect, 1.0);
+            }
+            else
+            {
+                indicator.progress = 1.0;
+                indicator.color = abnormalIndicatorColor;
+            }
+        }
+
+        Rectangle {
+            id: indicator
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.leftMargin: 2
+            anchors.bottomMargin: 2
+            anchors.topMargin: 2
+            anchors.rightMargin: 2
+            width: parent.width * progress - 4
+            color: progressBar.normalIndicatorColor
+            property real progress: 0.0
+        }
+        Text {
+            id: estimateText
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.leftMargin: 2
+            anchors.bottomMargin: 2
+            anchors.topMargin: 2
+            anchors.rightMargin: 2
+            font.pixelSize: 12
+        }
+
+        readonly property color normalIndicatorColor: "#55ff55"
+        readonly property color overtimeIndicatorColor: "#ff5555"
+        readonly property color abnormalIndicatorColor: "#ff9c00"
+    }
+
 }
 

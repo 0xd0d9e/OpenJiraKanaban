@@ -55,7 +55,7 @@ ApplicationWindow {
         Label { text: "User" }
         TextField {
             id: userEdit
-            text: kanban.user
+            text: { return kanban.user }
 
             Layout.fillWidth: true
         }
@@ -70,13 +70,29 @@ ApplicationWindow {
             Button {
                 text: "Save"
                 onClicked: {
-                    if (passwordEdit.text.length !== 0 && userEdit.text !== kanban.user) {
+                    if (passwordEdit.text.length !== 0 || userEdit.text !== kanban.user) {
+                        kanban.setAuth(userEdit.text, passwordEdit.text);
+                    }
+                    kanban.maxResults = maxResultsEdit.value;
+                    kanban.defaultGroups = groupEdit.text;
+                    kanban.setUrl(urlEdit.text);
+                    settings.visible = false
+                }
+            }
+            Button {
+                text: "Check"
+                onClicked: {
+                    var user = kanban.user;
+                    var authHash = kanban.authHash;
+                    var url = kanban.url;
+
+                    if (passwordEdit.text.length !== 0 || userEdit.text !== kanban.user) {
                         kanban.setAuth(userEdit.text, passwordEdit.text);
                     }
                     kanban.setUrl(urlEdit.text);
-                    kanban.maxResults = maxResultsEdit.value;
-                    kanban.defaultGroups = groupEdit.text;
-                    settings.visible = false
+                    kanban.user = user;
+                    kanban.authHash = authHash;
+                    kanban.url = url;
                 }
             }
             Button {

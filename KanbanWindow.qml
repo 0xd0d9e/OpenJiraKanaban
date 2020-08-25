@@ -6,12 +6,18 @@ import QtQuick.LocalStorage 2.0
 import QtQuick.Dialogs 1.3
 
 Rectangle {
-    id: rectangle1
+    id: root
     width: 640
     height: 480
     color: "transparent"
     clip: true
-    Component.onCompleted: JS.loadSettings()
+
+    Component.onCompleted: {
+        console.log("loadSettings")
+        JS.loadSettings()
+        console.log("  user", user)
+        console.log("  authHash", authHash)
+    }
 
     property var mainModel: []
     property var projects: []
@@ -33,11 +39,12 @@ Rectangle {
         JS.saveSetting('url', newUrl);
     }
 
-    function setAuth(user, password) {
-        rectangle1.user = user;
-        authHash = Qt.btoa(user + ':' + password);
+    function setAuth(userName, userPassword) {
+        user = userName;
+        authHash = Qt.btoa(userName + ':' + userPassword);
         JS.saveSetting('auth', authHash);
         JS.saveSetting('user', user);
+        JS.readProjects(url);
     }
 
     function makeQueryUrl() {
